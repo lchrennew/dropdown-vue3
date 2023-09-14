@@ -1,14 +1,13 @@
 <script setup>
-import { ref, provide } from "vue";
+import { provide, ref } from "vue";
 
 const open = ref(false)
 const show = () => open.value = true
 const hide = () => open.value = false
 
 const props = defineProps({
-    overlayClass: {
-        type: String,
-    }
+    overlayClass: { type: String, },
+    alignment: { type: String, default: 'left' }
 })
 
 provide('hide', hide)
@@ -19,7 +18,8 @@ provide('hide', hide)
         <div class="dropdown-trigger" @click.stop.prevent="show">
             <slot/>
         </div>
-        <div :class="{open, [overlayClass]: !!overlayClass}" class="dropdown-overlay" @click.stop>
+        <div :class="{open, [`align-${alignment}`]: true, [overlayClass]: !!overlayClass}" class="dropdown-overlay"
+             @click.stop>
             <slot name="overlay" v-bind="{open}"/>
         </div>
     </div>
@@ -38,7 +38,6 @@ provide('hide', hide)
         position: absolute;
         top: 100%;
         margin-top: 4px;
-        left: 0;
         opacity: 0;
         z-index: -1;
         border-radius: 6px;
@@ -47,6 +46,14 @@ provide('hide', hide)
         box-shadow: rgba(0, 0, 0, 0.02) 0 4px 8px;
         flex-direction: column;
         transition: all 0.1s linear;
+
+        &.align-left {
+            left: 0;
+        }
+
+        &.align-right {
+            right: 0;
+        }
 
         &.open {
             display: flex;
