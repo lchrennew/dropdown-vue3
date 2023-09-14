@@ -1,28 +1,39 @@
 <script setup>
 import { provide, ref, watch } from "vue";
 
-const open = ref(false)
-const show = () => open.value = true
-const hide = () => open.value = false
 
 const props = defineProps({
     overlayClass: { type: String, },
-    alignment: { type: String, default: 'left' }
+    alignment: { type: String, default: 'left' },
+    open: { type: Boolean, default: false },
+})
+const openInner = ref(props.open)
+const show = () => {
+    window.dispatchEvent(new Event('click'))
+    openInner.value = true
+}
+const hide = () => openInner.value = false
+const emit = defineEmits([ 'update:open' ])
+watch(() => props.open, value => openInner.value = value)
+watch(() => openInner.value, value => {
+    if (props.open !== value) emit("update:open", value);
+    const handler = value ? window.addEventListener : window.removeEventListener
+    handler('click', hide)
 })
 
 provide('hide', hide)
 
-watch(() => open, open => (open ? window.addEventListener : window.removeEventListener)('click', hide))
 </script>
 
 <template>
     <div class="dropdown">
-        <div class="dropdown-trigger" @click.stop.prevent="show">
+        <div class="dropdown-trigger" @click.stop.capture="show">
             <slot/>
         </div>
-        <div :class="{open, [`align-${alignment}`]: true, [overlayClass]: !!overlayClass}" class="dropdown-overlay"
+        <div :class="{open: openInner, [`align-${alignment}`]: true, [overlayClass]: !!overlayClass}"
+             class="dropdown-overlay"
              @click.stop>
-            <slot name="overlay" v-bind="{open}"/>
+            <slot name="overlay" v-bind="{open:openInner}"/>
         </div>
     </div>
 </template>
