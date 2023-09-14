@@ -1,5 +1,5 @@
 <script setup>
-import { provide, ref } from "vue";
+import { provide, ref, watch } from "vue";
 
 const open = ref(false)
 const show = () => open.value = true
@@ -11,6 +11,8 @@ const props = defineProps({
 })
 
 provide('hide', hide)
+
+watch(() => open, open => (open ? window.addEventListener : window.removeEventListener)('click', hide))
 </script>
 
 <template>
